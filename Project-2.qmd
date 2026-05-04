@@ -1,0 +1,178 @@
+---
+title: "Project"
+author: "Skilyn Leon"
+format: pdf
+toc: true
+editor: visual
+---
+
+## The network (G)
+
+![Ciel network plot](plot.png){fig-align="center" width="581"}
+
+## Table of G (ranked)
+
+| Node | Clustering Coefficient | Degree Centrality (Rank) | Betweenness Centrality | Closeness Centrality |
+|----|:---|----|----|----|
+| 1 | 0.05 (6) | 3/8 (3) | 0.6 (2) | 0.6 (1) |
+| 2 | 0.07 (5) | 0.46 (1) | 0.6 (1) | 0.6 (1) |
+| 3 | 1 (1) | 0.08 (6) | 0 (9) | 0.4 (7) |
+| 4 | 1/6 (4) | 1/6 (4) | 0.16 (4) | 0.41 (8) |
+| 5 | 0 (7) | 0.04 (7) | 0 (9) | 0.3 (12) |
+| 6 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 7 | 1/3 (2) | 1/6 (4) | 0.04 (7) | 0.44 (3) |
+| 8 | 1/3 (2) | 1/8 (5) | 0.2 (8) | 0.38 (9) |
+| 9 | 1 (1) | 0.08 (6) | 0 (9) | 0.33 (10) |
+| 10 | 1/3 (2) | 1/6 (4) | 0.06 (6) | 0.44 (3) |
+| 11 | 1/3 (2) | 1/6 (4) | 0.09 (5) | 0.42 (4) |
+| 12 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 13 | 0.2 (3) | 0.2 (2) | 0.12 (3) | 4/9 (2) |
+| 14 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 15 | 0 (7) | 0.04 (7) | 0 (9) | 0.3 (11) |
+| 16 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 17 | 1 (1) | 0.08 (6) | 0 (9) | 0.4 (7) |
+| 18 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 19 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 20 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 21 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+| 22 | 1 (1) | 0.08 (6) | 0 (9) | 0.41 (5) |
+| 23 | 0 (7) | 0.04 (7) | 0 (9) | 0.3 (12) |
+| 24 | 1 (1) | 0.08 (6) | 0 (9) | 0.4 (6) |
+| 25 | 0 (7) | 0.04 (7) | 0 (9) | 0.38 (9) |
+
+![](deg_vs_bet.png)
+
+![](dev.png){fig-align="center"}
+
+## Analysis
+
+The calculated density of the network is 0.11, which is quite low. This suggests that the network is sparse, meaning most nodes do not have direct connections with many others. Instead, the network relies on key intermediaries for communication and coordination. Degree Centrality identifies the most connected nodes, the ones with the highest number of direct connections. Betweenness Centrality reveals nodes that act as bridges or intermediaries. Closeness Centrality highlights nodes that can quickly reach others in the network. Clustering Coefficient measures how connected a node’s neighbors are to each other, indicating local connectivity. With this in mind, node 2 is likely the ring leader with rank 1 in Degree, Betweenness, and Closeness. Node 1 is likely the second in command (lieutenant) since its rank close second to node 2. Node 7 commuates with node 2 the most other than node 1. Drug Mules are nodes with medium-high connectivity but low clustering (10, 7, 24). Complementary Segment are nodes 8, 9, 16, 21, 23 with strong internal cliques but not as connected to the larger network. In order to dismantle the network removing nodes 1, 2, 13, 7 would disrupt the major connections.
+
+## Appendix
+
+```{python}
+#run these first
+import numpy as np
+import networkx as nx
+import pandas as pd
+import matplotlib.pyplot as plt
+```
+
+```{python}
+G = nx.Graph()
+graph_edges = [
+    (1, 2), (1, 3), (1, 4),(1,16),(1,6),(1,20),(1,18),(1,13),(1,22),
+    (2, 17), (2, 7),(2, 19),(2,21),(2,12),(2,25),(2,14),(2,10),(2,11),(2,24),
+    (3, 4),
+    (4,5),(4,15),
+    (7, 17), (7, 13),(7,10),
+    (8,9), (8, 10),(8,13),
+    (9, 13), 
+    (10, 11),
+    (11, 24), (11, 23),
+    (13,22)
+]
+G.add_edges_from(graph_edges)
+```
+
+## Adjacency matrix of G
+
+```{python}
+#creating adjancency matrix
+adjacency_matrix = nx.to_numpy_array(G, nodelist=sorted(G.nodes()), dtype=int)
+print("Symmetric Adjacency Matrix:")
+print(adjacency_matrix)
+```
+
+```{python}
+#recreating ciel network
+plt.figure(figsize = (7, 7))
+nx.draw(G, with_labels=True, node_color='purple', node_size=700, font_size=10, font_color='white', font_weight='bold', edge_color='gray')
+plt.title("Ciel Network Visualization")
+plt.show()
+```
+
+```{python}
+#Calculating the degree centrality, betweenness centrality, clustering coefficient, closeness centrality, density and global/mean clustering coefficient
+degree_centrality = nx.degree_centrality(G)
+betweenness_centrality = nx.betweenness_centrality(G)
+closeness_centrality = nx.closeness_centrality(G)
+clustering_coefficient = nx.clustering(G)
+density = nx.density(G)
+avg_clustering = nx.average_clustering(G)
+#making a data frame to show the values 
+metrics_df = pd.DataFrame({
+    'Node': sorted(G.nodes()),
+    'Degree Centrality': [degree_centrality[node] for node in sorted(G.nodes())],
+    'Betweenness Centrality': [betweenness_centrality[node] for node in sorted(G.nodes())],
+    'Closeness Centrality': [closeness_centrality[node] for node in sorted(G.nodes())],
+    'Clustering Coefficient': [clustering_coefficient[node] for node in sorted(G.nodes())],
+    'avg_clustering': avg_clustering,
+    'Density': density
+})
+print(metrics_df)
+```
+
+```{python}
+#creating a plot for show Degree centrality vs Betweenness Centrality
+plt.figure(figsize=(10, 6))
+plt.scatter(degree_centrality.values(), betweenness_centrality.values(), color='lavender', edgecolors='black', s=100, alpha=0.7)
+
+for node in G.nodes():
+    plt.text(degree_centrality[node], betweenness_centrality[node], str(node), fontsize=10.5)
+
+avg_degree = np.mean(list(degree_centrality.values()))
+avg_betweenness = np.mean(list(betweenness_centrality.values()))
+
+plt.axvline(avg_degree, color='c', linestyle='dashed', label=f'Avg Degree Centrality ({avg_degree:.2f})')
+plt.axhline(avg_betweenness, color='deeppink', linestyle='dashed', label=f'Avg Betweenness Centrality ({avg_betweenness:.2f})')
+
+plt.xlabel("Degree Centrality")
+plt.ylabel("Betweenness Centrality")
+plt.title("Degree Centrality vs Betweenness Centrality")
+plt.legend()
+plt.grid(True)
+
+plt.show()
+```
+
+```{python}
+#Finding the vaules 
+avg_closeness = np.mean(list(closeness_centrality.values()))
+betweenness_deviation = {node: value - avg_betweenness for node, value in betweenness_centrality.items()}
+degree_deviation = {node: value - avg_degree for node, value in degree_centrality.items()}
+closeness_deviation = {node: value - avg_closeness for node, value in closeness_centrality.items()}
+#creating a data frame to show values 
+dataframe = pd.DataFrame({
+    'Node': sorted(G.nodes()),
+    'Betweenness Deviation': [betweenness_deviation[node] for node in sorted(G.nodes())],
+    'Degree Deviation': [degree_deviation[node] for node in sorted(G.nodes())],
+    'Closeness Deviation': [closeness_deviation[node] for node in sorted(G.nodes())]
+})
+print(dataframe)
+
+plt.figure(figsize=(10, 6))
+
+# Plot Betweenness Deviation
+plt.plot(list(betweenness_deviation.keys()), list(betweenness_deviation.values()), label='Betweenness Deviation', marker='o', color='blue')
+for node, value in betweenness_deviation.items():
+    plt.text(node, value, str(node), fontsize=8, ha='right')
+
+# Plot Degree Deviation
+plt.plot(list(degree_deviation.keys()), list(degree_deviation.values()), label='Degree Deviation', marker='s', color='blueviolet')
+for node, value in degree_deviation.items():
+    plt.text(node, value, str(node), fontsize=8, ha='right')
+
+# Plot Closeness Deviation
+plt.plot(list(closeness_deviation.keys()), list(closeness_deviation.values()), label='Closeness Deviation', marker='^', color='magenta')
+for node, value in closeness_deviation.items():
+    plt.text(node, value, str(node), fontsize=8, ha='right')
+
+plt.xlabel('Nodes')
+plt.ylabel('Deviation from Average')
+plt.title('Centrality Measure Deviations')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+```
